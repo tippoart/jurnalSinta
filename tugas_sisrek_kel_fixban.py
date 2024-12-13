@@ -13,6 +13,7 @@ Original file is located at
 # latif ardiansyah 22.12.2599
 # reyhan dwi wira allofadieka 22.12.2563
 
+
 import pandas as pd
 
 jurnal_df = pd.read_excel('jurnal_sinta.xlsx')
