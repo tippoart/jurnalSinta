@@ -7,7 +7,7 @@ Original file is located at
     https://colab.research.google.com/drive/1KhYvcoPJ3UBKy7J73Es23RiflZ_77HA_
 """
 
-!pip install Sastrawi
+# pip install Sastrawi
 
 #Kelompok fixban
 # latif ardiansyah 22.12.2599
