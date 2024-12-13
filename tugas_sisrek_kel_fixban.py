@@ -1,7 +1,3 @@
-# -*- coding: utf-8 -*-
-
-# Install library yang dibutuhkan
-# pip install pandas openpyxl Sastrawi scikit-learn
 
 # Anggota kelompok
 # latif ardiansyah 22.12.2599
