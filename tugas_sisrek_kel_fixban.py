@@ -80,7 +80,7 @@ st.title("Sistem Rekomendasi jurnal Sinta Teknologi")
 
 place_input = st.text_input("Masukkan nama jurnal favorit Anda:")
 
-num_recommendations = st.slider("Pilih jumlah rekomendasi jurnal", min_value=1, max_value=59, value=5)
+num_recommendations = st.slider("Pilih jumlah rekomendasi jurnal", min_value=1, max_value=30, value=5)
 
 if st.button("Cari Recomendasi"):
     if place_input:
