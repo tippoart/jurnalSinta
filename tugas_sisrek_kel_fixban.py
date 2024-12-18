@@ -74,19 +74,14 @@ def recommendations(name, top=10):
     # Final recommended journals based on sorted indexes
     recommended_jurnal = [filtered_indices[i] for i in top_indexes]
 
-    # Ensure we return exactly 'top' recommendations
     return recommended_jurnal[:top]
 
-# Streamlit UI
 st.title("Sistem Rekomendasi jurnal Sinta Teknologi")
 
-# Input for user query
 place_input = st.text_input("Masukkan nama jurnal favorit Anda:")
 
-# Slider to select number of recommendations
 num_recommendations = st.slider("Pilih jumlah rekomendasi jurnal", min_value=1, max_value=20, value=5)
 
-# Button to trigger recommendation search
 if st.button("Cari Recomendasi"):
     if place_input:
         with st.spinner("Mencari rekomendasi..."):
@@ -95,5 +90,5 @@ if st.button("Cari Recomendasi"):
             for idx, jurnal in enumerate(hasil_rekomendasi, start=1):
                 st.write(f"{idx}. {jurnal}")
 
-# Display DataFrame (optional)
+
 st.dataframe(jurnal_df)
