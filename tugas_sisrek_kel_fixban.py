@@ -73,7 +73,7 @@ def recommendations(name, top=10):
 st.title("Sistem Rekomendasi jurnal")
 
 place_input = st.text_input("Masukkan nama jurnal favorit Anda:")
-#test
+
 if st.button("Cari Recomendasi"):
     if place_input:
         with st.spinner("Mencari rekomendasi..."):
