@@ -1,109 +1,87 @@
-# Anggota kelompok
-# Latif Ardiansyah 22.12.2599
-# Reyhan Dwi Wira Allofadieka 22.12.2563
-
-import streamlit as st
 import pandas as pd
-from sklearn.metrics.pairwise import cosine_similarity
-from sklearn.feature_extraction.text import TfidfVectorizer
-from Sastrawi.StopWordRemover.StopWordRemoverFactory import StopWordRemoverFactory
-from Sastrawi.Stemmer.StemmerFactory import StemmerFactory
 import re
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.metrics.pairwise import cosine_similarity
+from Sastrawi.Stemmer.StemmerFactory import StemmerFactory
+from Sastrawi.StopWordRemover.StopWordRemoverFactory import StopWordRemoverFactory
+import streamlit as st
 
-# Title aplikasi
-st.title("Sistem Rekomendasi Jurnal SINTA")
-st.write("Aplikasi ini memberikan rekomendasi berdasarkan judul yang dimasukkan.")
-
-# Cek apakah file ada dan kolom 'judul_prosessing' tersedia
-try:
-    jurnal_df = pd.read_excel('jurnal_sinta.xlsx')
-    if 'judul_prosessing' not in jurnal_df.columns:
-        st.error("Kolom 'judul_prosessing' tidak ditemukan di file 'jurnal_sinta.xlsx'.")
-        st.stop()
-except FileNotFoundError:
-    st.error("File 'jurnal_sinta.xlsx' tidak ditemukan. Pastikan file ada di direktori yang benar.")
-    st.stop()
-except Exception as e:
-    st.error(f"Error saat membaca file: {e}")
-    st.stop()
-
-# Hapus data kosong
-jurnal_df = jurnal_df[jurnal_df['judul_prosessing'].notnull()]
-
-# Inisialisasi pembersihan teks
-clean_spcl = re.compile(r'[/(){}\[\]\|@,;]')
-clean_symbol = re.compile(r'[^0-9a-z #+_]')
-sastrawi = StopWordRemoverFactory()
-stopwords = sastrawi.get_stop_words()
+clean_spcl = re.compile('[/(){}\[\]\|@,;]')
+clean_symbol = re.compile('[^0-9a-z #+_]')
+factory = StopWordRemoverFactory()
+stopworda = factory.get_stop_words()
 factory = StemmerFactory()
 stemmer = factory.create_stemmer()
 
-# Fungsi pembersihan teks
 def clean_text(text):
-    """Membersihkan teks dengan menghapus simbol, stopwords, dan stemming."""
-    text = text.lower()
-    text = clean_spcl.sub(' ', text)  # Hapus simbol khusus
-    text = clean_symbol.sub('', text)  # Hapus simbol yang tidak diperlukan
+    text = text.lower()  
+    text = clean_spcl.sub(' ', text)  
+    text = clean_symbol.sub('', text)  
+    text = ' '.join(word for word in text.split() if word not in stopworda)  # Hapus stopwords
     text = stemmer.stem(text)  # Stemming
-    text = ' '.join(word for word in text.split() if word not in stopwords)  # Hapus stopwords
     return text
 
-# Pembersihan teks pada kolom 'judul_prosessing'
-jurnal_df['desc_clean'] = jurnal_df['judul_prosessing'].apply(clean_text)
+jurnal_df = pd.read_excel('jurnal_sinta_tek.xlsx')
 
-# Konversi teks ke matriks TF-IDF
-tfidf_vectorizer = TfidfVectorizer(analyzer='word', ngram_range=(1, 3), min_df=0.0)
-tfidf_matrix = tfidf_vectorizer.fit_transform(jurnal_df['desc_clean'])
+jurnal_df['judul_prosessing'] = jurnal_df['judul_prosessing'].apply(clean_text)
+jurnal_df.reset_index(inplace=True)
 
-# Hitung cosine similarity
-cosine_sim_matrix = cosine_similarity(tfidf_matrix, tfidf_matrix)
+jurnal_df.set_index('judul_prosessing', inplace=True)
 
-# Buat indeks untuk pencarian rekomendasi
-indices = pd.Series(jurnal_df['judul_prosessing'])
+tf = TfidfVectorizer(analyzer='word', ngram_range=(1, 3), min_df=1)
 
-# Fungsi rekomendasi
+tfidf_matrix = tf.fit_transform(jurnal_df.index)
+
+cos_sim = cosine_similarity(tfidf_matrix, tfidf_matrix)
+
+indices = pd.Series(jurnal_df.index)
+
 def recommendations(name, top=10):
-    """
-    Memberikan rekomendasi berdasarkan nama yang diberikan
-    Args:
-        name (str): Judul yang ingin dicari rekomendasinya.
-        top (int): Jumlah rekomendasi yang diinginkan.
-    Returns:
-        list: Daftar rekomendasi dengan skor kemiripan.
-    """
-    if name not in indices.values:
-        return None
+    recommended_jurnal = []
 
-    # Ambil indeks dari nama yang diminta
-    idx = indices[indices == name].index[0]
+    cleaned_name = clean_text(name)
+    input_tokens = set(cleaned_name.split())
+    filtered_indices = []
+    for idx in jurnal_df.index:
+        if any(token in clean_text(idx) for token in input_tokens):
+            filtered_indices.append(idx)
 
-    # Ambil skor kesamaan
-    similarity_scores = pd.Series(cosine_sim_matrix[idx]).sort_values(ascending=False)
+    if not filtered_indices:  # Jika tidak ada hasil yang cocok
+        return [f"Tidak ada jurnal yang cocok dengan kata kunci '{name}'"]
 
-    # Dapatkan rekomendasi teratas (lewati indeks pertama karena itu dirinya sendiri)
-    top_indexes = list(similarity_scores.iloc[1:top+1].index)
-    recommended_list = [
-        (jurnal_df['judul_prosessing'].iloc[i], similarity_scores[i]) 
-        for i in top_indexes
-    ]
+    filtered_df = jurnal_df.loc[filtered_indices]
+    filtered_numeric_indices = [list(jurnal_df.index).index(i) for i in filtered_indices]
 
-    return recommended_list
+    tfidf_matrix_filtered = tfidf_matrix[filtered_numeric_indices]
+    cos_sim_filtered = cosine_similarity(tfidf_matrix_filtered, tfidf_matrix_filtered)
 
-# Input pengguna
-judul_input = st.text_input("Masukkan judul jurnal untuk rekomendasi:")
+    idx = filtered_numeric_indices[0] 
 
-# Slider untuk menentukan jumlah rekomendasi
-top_n = st.slider("Jumlah rekomendasi yang diinginkan:", 1, 20, 5)
+    score_series = pd.Series(cos_sim_filtered[0]).sort_values(ascending=False)
 
-# Tombol untuk memulai rekomendasi
-if st.button("Cari Rekomendasi"):
-    if judul_input:
-        hasil_rekomendasi = recommendations(judul_input, top=top_n)
-        if hasil_rekomendasi:
-            st.subheader(f"Rekomendasi untuk: {judul_input}")
-            for judul, similarity in hasil_rekomendasi:
-                st.write(f"**{judul}** - Similarity: {similarity:.2f}")
-        else:
-            st.error(f"Judul '{judul_input}' tidak ditemukan dalam dataset.")
-    else:
-        st.error("Harap masukkan judul jurnal terlebih dahulu.")
+    top_indexes = list(score_series.iloc[1:top+1].index)
+
+    input_position = next((i for i, idx in enumerate(filtered_indices) if clean_text(idx) == cleaned_name), None)
+    
+    if input_position is not None:
+        top_indexes.insert(0, input_position)  
+
+    recommended_jurnal = [filtered_indices[i] for i in top_indexes]
+
+    return recommended_jurnal[:top]
+
+st.title("Sistem Rekomendasi jurnal")
+
+place_input = st.text_input("Masukkan nama jurnal favorit Anda:")
+
+if st.button("Cari Recomendasi"):
+    if place_input:
+        with st.spinner("Mencari rekomendasi..."):
+    
+            hasil_rekomendasi = recommendations(place_input, top=5)
+            st.write("Rekomendasi jurnal untuk Anda:")
+            for jurnal in hasil_rekomendasi:
+                st.write(jurnal)
+
+jurnal_df = pd.read_excel('jurnal_sinta_tek.xlsx')
+st.dataframe(jurnal_df)
