@@ -70,7 +70,7 @@ def recommendations(name, top=10):
 
     return recommended_jurnal[:top]
 
-st.title("Sistem Rekomendasi jurnal")
+st.title("Sistem Rekomendasi jurnal Sinta Teknologi")
 
 place_input = st.text_input("Masukkan nama jurnal favorit Anda:")
 # Tampilkan tombol "Cari Recomendasi"
