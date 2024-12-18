@@ -95,5 +95,4 @@ if st.button("Cari Recomendasi"):
             for jurnal in hasil_rekomendasi:
                 st.write(jurnal)
 
-# Display DataFrame (optional)
 st.dataframe(jurnal_df)
