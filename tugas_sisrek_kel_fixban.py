@@ -68,7 +68,7 @@ if st.button("Cari Rekomendasi"):
                 st.write(hasil_rekomendasi[0])
             else:  # Jika ada hasil
                 for idx, row in hasil_rekomendasi.iterrows():
-                    st.write(f"{idx + 1}. {row['judul']}")
+                    st.write(f"{idx + 1}. {row['judul_prosessing']}")
 
 # Tampilkan dataframe jurnal untuk referensi
 st.write("Dataset Jurnal:")
