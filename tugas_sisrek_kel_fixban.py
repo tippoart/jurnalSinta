@@ -92,7 +92,8 @@ if st.button("Cari Recomendasi"):
         with st.spinner("Mencari rekomendasi..."):
             hasil_rekomendasi = recommendations(place_input, top=num_recommendations)
             st.write("Rekomendasi jurnal untuk Anda:")
-            for jurnal in hasil_rekomendasi:
-                st.write(jurnal)
+            for idx, jurnal in enumerate(hasil_rekomendasi, start=1):
+                st.write(f"{idx}. {jurnal}")
 
+# Display DataFrame (optional)
 st.dataframe(jurnal_df)
