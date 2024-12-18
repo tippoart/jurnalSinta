@@ -35,7 +35,7 @@ tfidf_matrix = tf.fit_transform(jurnal_df.index)
 cos_sim = cosine_similarity(tfidf_matrix, tfidf_matrix)
 
 indices = pd.Series(jurnal_df.index)
-#
+#tess
 def recommendations(name, top=10):
     recommended_jurnal = []
 
