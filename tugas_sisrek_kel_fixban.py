@@ -5,7 +5,8 @@ from sklearn.metrics.pairwise import cosine_similarity
 from Sastrawi.Stemmer.StemmerFactory import StemmerFactory
 from Sastrawi.StopWordRemover.StopWordRemoverFactory import StopWordRemoverFactory
 import streamlit as st
-
+#latif ardiansyah 22.12.2599
+#reyhan dwi wira allofadieka 22.12.2563 
 # Preprocessing setup
 clean_spcl = re.compile(r'[/(){}\[\]\|@,;]')
 clean_symbol = re.compile(r'[^0-9a-z #+_]')
