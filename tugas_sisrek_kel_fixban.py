@@ -56,7 +56,8 @@ def recommendations(query, top=10):
 
 # Streamlit app
 st.title("Sistem Rekomendasi Jurnal Sinta Teknologi")
-
+st.write("latif ardiansyah 22.12.2599")
+st.write("reyhan dwi wira allofadieka 22.12.2563")
 query_input = st.text_input("Masukkan kata atau kalimat pencarian:")
 num_recommendations = st.slider("Jumlah rekomendasi jurnal", min_value=1, max_value=30, value=5)
 
